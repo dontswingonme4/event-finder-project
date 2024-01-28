@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 from flask import Flask, request
+import requests
 
 app = Flask(__name__)
+data_collector_url = "http://localhost:5001/collect_data" #POST request to the data collector app
 
 @app.route("/")
 def main():
@@ -38,7 +40,15 @@ def main():
 def echo_input():
     city = request.form.get("city", "")
     selected_timeframe = request.form.get("selected_timeframe", "")
-    return f"Searching for events in {city} in the {selected_timeframe}!"
 
+    # Make a POST request to the data_collector app to fetch event data
+    data_collector_payload = {"city": city}
+    response = requests.post(data_collector_url, data=data_collector_payload)
 
+    # Extract event data from the response
+    event_data = response.text
 
+    return f"Searching for events in {city} in the {selected_timeframe}!\n\nEvent Data: {event_data}"
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
